@@ -33,14 +33,15 @@
 ---
 
 ## 其它
-* 若不喜歡全螢幕可以至AppData\Local\Risen的Window中加入FullScreen="false"來將遊戲視窗化
+* 若不喜歡全螢幕可以至AppData\Local\Risen的ConfigUser.xml以記事本開啟
+並在Window中加入FullScreen="false"來將遊戲視窗化
 
 ```
 		<Window
 			AdapterNumber="0"
 			Bottom="1440"
 			FOV="60.000000"
-			FullScreen="false"
+			FullScreen="false"  --自己加入
 			Left="0"
 			RefreshRate="60"
 			Right="2560"
