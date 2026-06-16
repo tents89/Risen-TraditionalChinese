@@ -33,18 +33,4 @@
 ---
 
 ## 其它
-* 若不喜歡全螢幕可以至AppData\Local\Risen修改ConfigUser.xml，只要在Window中加入FullScreen="false"就可以將遊戲視窗化，但桌面鼠標不會消失。
-
-```
-		<Window
-			AdapterNumber="0"
-			Bottom="1440"
-			FOV="60.000000"
-			FullScreen="false"  --自己加入
-			Left="0"
-			RefreshRate="60"
-			Right="2560"
-			Top="0"
-			Vsync="false"
-		>
-```
+參考[Wiki](https://github.com/tents89/Risen-1-Traditional-Chinese/wiki) 
