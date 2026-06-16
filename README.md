@@ -5,7 +5,7 @@
 
 ---
 
-## 改善
+## 模組功能
 
 ### 共通修正
 * **詞彙調整**：修正繁簡轉換錯別字。
@@ -32,7 +32,7 @@
 
 ## Credits
  
-* **腳本參考**：參考自
+* **腳本參考**：
 > * [GitHub - hhergeth/RisenEditor](https://github.com/hhergeth/RisenEditor)
 > * [GitHub - Baltram/rmtools](https://github.com/Baltram/rmtools)
 > * [worldofplayers社群](https://forum.worldofplayers.de/forum/forums/417-World-of-Risen)
@@ -48,7 +48,7 @@
 ## 免責聲明
 
 * 本模組僅供愛好者交流與學習使用，所有遊戲文本版權皆歸原遊戲開發商與發行商所有。
-* 
+* 工具使用AI輔助製作。
 ---
 
 ## 其它

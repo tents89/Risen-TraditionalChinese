@@ -1,48 +1,24 @@
 """
-Risen 1 PAK / P00 / P01 ... pack & unpack.
+Risen 1 / Risen 2 PAK / P00 / P01 ... pack & unpack (ZLIB support).
 
 Each .pak / .p0N file is a self-contained volume with this layout:
 
     header (48 bytes):
         u32  version       (= 1)
         char[4] magic      ("G3V0")
-        16x  reserved zeros
+        8x   reserved zeros
+        u32  unknown3      (= 1)
+        u32  unknown4      (Risen 1 = 0, Risen 2 = 0xFEEDFACE)
         i64  data_offset   (= 48, files start right after header)
         i64  root_offset   (location of root directory record)
         i64  volume_size   (total file size)
 
     file data area:
-        raw bytes for every file, optionally zlib-compressed
-
-    directory tree at root_offset:
-        directory record (no leading attribute):
-            i32  name_len
-            if name_len != 0: name_len + 1 bytes  (last byte = '\0')
-            i64  time_created
-            i64  time_accessed
-            i64  time_modified
-            u32  attributes
-            i32  child_count
-            for each child:
-                u32  attributes        (has Directory bit if child is a directory)
-                directory record OR file record (without leading attribute)
-
-        file record (no leading attribute):
-            i32  name_len
-            if name_len != 0: name_len + 1 bytes  (last byte = '\0')
-            i64  data_offset
-            i64  time_created
-            i64  time_accessed
-            i64  time_modified
-            u32  attributes
-            u32  encryption        (= 0)
-            u32  compression       (0 = none, 2 = zlib)
-            i32  compressed_size
-            i32  uncompressed_size
+        raw bytes for every file, optionally compressed (ZLIB)
 
 Usage:
-    python risen_unpak.py extract <archive_or_folder> [-o out_dir] [-l]
-    python risen_unpak.py pack    <folder>            [-o out.pak]
+    python risen_pak.py extract <archive_or_folder> [-o out_dir] [-l]
+    python risen_pak.py pack    <folder>            [-o out.pak] [-g 1|2] [--no-compress]
 """
 
 import argparse
@@ -58,11 +34,15 @@ ATTR_ARCHIVE   = 0x00000020
 ATTR_PACKED    = 0x00020000
 
 COMPRESSION_NONE = 0x00000000
-COMPRESSION_AUTO = 0x00000001
 COMPRESSION_ZLIB = 0x00000002
 
 HEADER_SIZE = 48
-HEADER_MAGIC = b"\x01\x00\x00\x00G3V0" + b"\x00" * 16
+HEADER_MAGIC_R1 = b"\x01\x00\x00\x00G3V0" + b"\x00" * 8 + b"\x01\x00\x00\x00" + b"\x00" * 4
+HEADER_MAGIC_R2 = b"\x01\x00\x00\x00G3V0" + b"\x00" * 8 + b"\x01\x00\x00\x00\xCE\xFA\xED\xFE"
+
+
+def header_magic_for(game):
+    return HEADER_MAGIC_R1 if game == 1 else HEADER_MAGIC_R2
 
 
 # =========================================================================
@@ -109,7 +89,6 @@ class Entry:
         self.t_created = 0
         self.t_accessed = 0
         self.t_modified = 0
-        # only used when packing
         self.src_path = None
 
 
@@ -185,7 +164,8 @@ def extract_archive(pak_path, out_dir, list_only=False):
     def handle(path_parts, entry):
         rel = Path(*path_parts) if path_parts else Path(entry.name)
         if list_only:
-            tag = "ZLIB" if entry.compression & COMPRESSION_ZLIB else "RAW "
+            if entry.compression & COMPRESSION_ZLIB: tag = "ZLIB"
+            else: tag = "RAW "
             print(f"  {tag} {entry.uncomp_size:>10}  {rel}")
         else:
             target = base / rel
@@ -253,7 +233,7 @@ def _build_tree(folder):
                 d.children.append(f)
         return d
 
-    root = make_dir(folder, "")  # root has empty name
+    root = make_dir(folder, "")
     return root
 
 
@@ -264,19 +244,27 @@ def _encode_name(name):
     return struct.pack("<i", len(name)) + raw
 
 
-def _write_file_data(out, entry):
-    """Walk tree, write file bytes, fill in entry.offset/comp_size/compression."""
+def _write_file_data(out, entry, no_compress=False):
     if entry.is_dir:
         for c in entry.children:
-            _write_file_data(out, c)
+            _write_file_data(out, c, no_compress)
         return
+
     with open(entry.src_path, "rb") as fh:
         data = fh.read()
+
     entry.uncomp_size = len(data)
-    entry.compression = COMPRESSION_NONE
     entry.offset = out.tell()
-    entry.comp_size = len(data)
-    out.write(data)
+
+    if no_compress or entry.uncomp_size < 1024: 
+        entry.compression = COMPRESSION_NONE
+        entry.comp_size = len(data)
+        out.write(data)
+    else:
+        comp_data = zlib.compress(data)
+        entry.compression = COMPRESSION_ZLIB
+        entry.comp_size = len(comp_data)
+        out.write(comp_data)
 
 
 def _write_directory_record(out, entry):
@@ -304,7 +292,7 @@ def _write_file_record(out, entry):
     out.write(struct.pack("<i", entry.uncomp_size))
 
 
-def pack_folder(folder, out_path):
+def pack_folder(folder, out_path, game=2, no_compress=False):
     folder = Path(folder)
     out_path = Path(out_path)
     root = _build_tree(folder)
@@ -319,11 +307,11 @@ def pack_folder(folder, out_path):
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "wb") as out:
-        out.write(HEADER_MAGIC)
-        out.write(b"\x00" * 24)   # data/root/volume placeholders
+        out.write(header_magic_for(game))
+        out.write(b"\x00" * 24)  
         assert out.tell() == HEADER_SIZE
 
-        _write_file_data(out, root)
+        _write_file_data(out, root, no_compress)
 
         root_offset = out.tell()
         _write_directory_record(out, root)
@@ -333,7 +321,7 @@ def pack_folder(folder, out_path):
         out.write(struct.pack("<qqq", HEADER_SIZE, root_offset, volume_size))
 
     print(f"[pack] {folder} -> {out_path}  ({file_count[0]} files, "
-          f"{volume_size:,} bytes, zlib=off)")
+          f"{volume_size:,} bytes, game=Risen{game}, compress={'none' if no_compress else 'zlib'})")
 
 
 # =========================================================================
@@ -356,11 +344,11 @@ def cmd_pack(args):
         print(f"pack input must be a folder: {folder}", file=sys.stderr)
         sys.exit(1)
     out = Path(args.out) if args.out else folder.with_suffix(".pak")
-    pack_folder(folder, out)
+    pack_folder(folder, out, args.g, args.no_compress)
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Risen 1 PAK pack / unpack")
+    ap = argparse.ArgumentParser(description="Risen 1 and Risen 2 PAK pack / unpack (ZLIB)")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p_ex = sub.add_parser("extract", help="unpack .pak / .p00 / .p01 ...")
@@ -370,8 +358,12 @@ def main():
     p_ex.set_defaults(func=cmd_extract)
 
     p_pk = sub.add_parser("pack", help="pack a folder into a .pak volume")
-    p_pk.add_argument("input", help="folder to pack (its contents become the PAK root)")
-    p_pk.add_argument("-o", "--out", help="output .pak path (default: <folder>.pak)")
+    p_pk.add_argument("input", help="folder to pack")
+    p_pk.add_argument("-o", "--out", help="output .pak path")
+    p_pk.add_argument("-g", type=int, choices=[1, 2], default=2,
+                      help="Game: 1 = Risen 1, 2 = Risen 2 (default 2)")
+    p_pk.add_argument("--no-compress", action="store_true",
+                      help="No compression, write as raw (default: zlib)")
     p_pk.set_defaults(func=cmd_pack)
 
     args = ap.parse_args()
