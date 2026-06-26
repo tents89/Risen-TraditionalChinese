@@ -1,0 +1,8 @@
+#include "../core/base.inl"
+#include "../core/runtime.inl"
+#include "../assets/atlas_io.inl"
+#include "../assets/glyph_data.inl"
+#include "../config/config_io.inl"
+#include "../hooks/draw_hooks.inl"
+#include "../hooks/install_hooks.inl"
+#include "proxy_exports.inl"

@@ -47,7 +47,7 @@ Used to generate game-compatible font files after unpacking the font archives.
 用於提取與重建遊戲資源封包（`.pak` 檔案）。
 
 * **支援遊戲:** 《Risen 1》與《Risen 2: Dark Waters》。
-* **Risen 3:** 請使用 `r3resman` 此工具處理《Risen 3》的打包與解包。
+* **Risen 3:** 請使用 [r3resman](https://forum.worldofplayers.de/forum/threads/1381917-tool-Risen-3-Resource-Manager) 此工具處理《Risen 3》的打包與解包。
 
 ### 2. risen_text (文本解包與打包)
 用於提取（解包）與回填（打包）遊戲的在地化語系文字，以便進行翻譯或文本修改。

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\bootstrap">
+      <UniqueIdentifier>{B64D9403-7BB7-4B70-9380-7D65D34D8B51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{61F18A78-C84D-4E11-8A17-FD5D219E1A1F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\assets">
+      <UniqueIdentifier>{901B8D26-58D8-4636-A3D4-DBB6EA7D8A0D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{EB6A4E67-DA1A-4B68-84DE-1A09B7C4BCF7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hooks">
+      <UniqueIdentifier>{6DE64B47-7AA7-4556-83E5-C7352B0F99FB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Project Files">
+      <UniqueIdentifier>{8C4A3CC6-74A8-4D71-8B6B-D5A8CF90D7D9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bootstrap\dllmain.cpp">
+      <Filter>Source Files\bootstrap</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\base.inl">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\runtime.inl">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\atlas_io.inl">
+      <Filter>Source Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\glyph_data.inl">
+      <Filter>Source Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config\config_io.inl">
+      <Filter>Source Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hooks\draw_hooks.inl">
+      <Filter>Source Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hooks\install_hooks.inl">
+      <Filter>Source Files\hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bootstrap\proxy_exports.inl">
+      <Filter>Source Files\bootstrap</Filter>
+    </ClInclude>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Resource Files</Filter> </ResourceCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Risen3FontHook.def">
+      <Filter>Project Files</Filter>
+    </None>
+    <None Include="Risen3FontHook.ini">
+      <Filter>Project Files</Filter>
+    </None>
+    <None Include="Risen3FontHook.developer.ini">
+      <Filter>Project Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
